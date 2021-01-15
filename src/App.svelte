@@ -2,9 +2,6 @@
   import {
     CircleMarker,
     LeafletMap,
-    Marker,
-    Polygon,
-    Popup,
     TileLayer,
     Tooltip,
   } from "svelte-leafletjs";
@@ -20,9 +17,10 @@
     selected?: boolean;
   };
   let attractors = new Array<Point>();
-
   $: attractors = processInput(attractorS);
-  $: console.log(attractors);
+
+  let points = new Array<Point>();
+  $: points = processInput(pointS);
 
   function processInput(data: string) {
     const result = new Array<Point>();
@@ -58,23 +56,24 @@
 
   let leafletMap;
 
-  function mousemove(ev) {
+  function closestAttractor(searchPoint: LatLng) {
     let closest: Point = undefined;
     let distance = Infinity;
-
     for (const p of attractors) {
       const pl = new LatLng(p.lat, p.lon);
-      const dist = ev.detail.latlng.distanceTo(pl);
+      const dist = searchPoint.distanceTo(pl);
       if (dist < distance) {
         distance = dist;
-        if (closest) {
-          closest.selected = false;
-        }
-        p.selected = true;
         closest = p;
-      } else {
-        p.selected = false;
       }
+    }
+    return closest;
+  }
+
+  function mousemove(ev) {
+    const closest = closestAttractor(ev.detail.latlng);
+    for (let attractor of attractors) {
+      attractor.selected = attractor === closest;
     }
     attractors = attractors;
   }
@@ -109,6 +108,23 @@
           color={point.selected ? "#ff0000" : "#0000ff"}
         >
           <Tooltip>{point.title}</Tooltip>
+        </CircleMarker>
+      {/each}
+      {#each points as point}
+        <CircleMarker
+          latLng={[point.lat, point.lon]}
+          color={point.selected ? "#ff0000" : "#0000ff"}
+          fill={true}
+          fillColor="#0000ff"
+          fillOpacity={1.0}
+          fillRule="nonzero"
+          radius={5}
+        >
+          <Tooltip
+            >{point.title}<br />
+            closest to {closestAttractor(new LatLng(point.lat, point.lon))
+              .title}</Tooltip
+          >
         </CircleMarker>
       {/each}
     </LeafletMap>
