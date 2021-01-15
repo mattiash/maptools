@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {
     CircleMarker,
     LeafletMap,
@@ -8,11 +8,42 @@
     TileLayer,
     Tooltip,
   } from "svelte-leafletjs";
-  import TestData from "./TestData";
 
+  let input = "59.33258, 18.0649, Stockholm\n51.50853, -0.12574, London";
+
+  type Point = {
+    lat: number;
+    lon: number;
+    title: string;
+    selected?: boolean;
+  };
+  let points = new Array<Point>();
+
+  $: points = processInput(input);
+  $: console.log(points);
+
+  function processInput(data: string) {
+    const result = new Array<Point>();
+
+    for (const line of data.split("\n").map((s) => s.trim())) {
+      try {
+        console.log("line", line);
+        const [latS, lonS, title] = line.split(/\s*,\s*/);
+        const lat = parseFloat(latS);
+        const lon = parseFloat(lonS);
+        console.log(lat, lon);
+        if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+          console.log("push");
+          result.push({ lat, lon, title });
+        }
+      } catch (err) {}
+    }
+    console.log(result);
+    return result;
+  }
   const mapOptions = {
-    center: [1.364917, 103.822872],
-    zoom: 11,
+    center: [59.33258, 18.0649],
+    zoom: 2,
   };
   const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
   const tileLayerOptions = {
@@ -26,38 +57,39 @@
   let leafletMap;
 
   function mousemove(ev) {
-    for (const p of TestData.points) {
-      p[3] = p[0] < ev.detail.latlng.lat;
-    }
-    TestData.points = TestData.points;
+    // for (const p of TestData.points) {
+    //   p[3] = p[0] < ev.detail.latlng.lat;
+    // }
+    // TestData.points = TestData.points;
   }
 </script>
 
-<div class="example">
-  <LeafletMap
-    bind:this={leafletMap}
-    options={mapOptions}
-    events={["mousemove"]}
-    on:mousemove={mousemove}
-  >
-    <TileLayer url={tileUrl} options={tileLayerOptions} />
-    <Polygon
-      latLngs={TestData.sentosaPolygon}
-      color="#ff0000"
-      fillColor="#ff0000"
+<div style="display: flex; flex-direction: row;">
+  <div>
+    <textarea
+      style="height: 95vh; display: inline-block"
+      cols="50"
+      bind:value={input}
+    />
+  </div>
+  <div style="height: 95vh; width:100%">
+    <LeafletMap
+      bind:this={leafletMap}
+      options={mapOptions}
+      events={["mousemove"]}
+      on:mousemove={mousemove}
     >
-      <Popup>Sentosa</Popup>
-      <Tooltip>Sentosa</Tooltip>
-    </Polygon>
-    {#each TestData.points as point}
-      <CircleMarker
-        latLng={[point[0], point[1]]}
-        color={point[3] ? "#ff0000" : "#0000ff"}
-      >
-        <Tooltip>{point[2]}</Tooltip>
-      </CircleMarker>
-    {/each}
-  </LeafletMap>
+      <TileLayer url={tileUrl} options={tileLayerOptions} />
+      {#each points as point}
+        <CircleMarker
+          latLng={[point.lat, point.lon]}
+          color={point.selected ? "#ff0000" : "#0000ff"}
+        >
+          <Tooltip>{point.title}</Tooltip>
+        </CircleMarker>
+      {/each}
+    </LeafletMap>
+  </div>
 </div>
 
 <style>
