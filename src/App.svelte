@@ -27,11 +27,12 @@
 
     for (const line of data.split("\n").map((s) => s.trim())) {
       try {
-        console.log("line", line);
+        if (line.startsWith("#")) {
+          continue;
+        }
         const [latS, lonS, title] = line.split(/\s*,\s*/);
         const lat = parseFloat(latS);
         const lon = parseFloat(lonS);
-        console.log(lat, lon);
         if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
           console.log("push");
           result.push({ lat, lon, title });
@@ -56,7 +57,7 @@
 
   let leafletMap;
 
-  function closestAttractor(searchPoint: LatLng) {
+  function closestPoint(searchPoint: LatLng, points: Array<Point>) {
     let closest: Point = undefined;
     let distance = Infinity;
     for (const p of attractors) {
@@ -71,7 +72,7 @@
   }
 
   function mousemove(ev) {
-    const closest = closestAttractor(ev.detail.latlng);
+    const closest = closestPoint(ev.detail.latlng, attractors);
     for (let attractor of attractors) {
       attractor.selected = attractor === closest;
     }
@@ -83,13 +84,13 @@
   <div>
     <h2>Attractors</h2>
     <textarea
-      style="height: 40vh; display: inline-block"
+      style="height: 30vh; display: inline-block"
       cols="50"
       bind:value={attractorS}
     />
     <h2>Points</h2>
     <textarea
-      style="height: 40vh; display: inline-block"
+      style="height: 30vh; display: inline-block"
       cols="50"
       bind:value={pointS}
     />
@@ -122,8 +123,10 @@
         >
           <Tooltip
             >{point.title}<br />
-            closest to {closestAttractor(new LatLng(point.lat, point.lon))
-              .title}</Tooltip
+            closest to {closestPoint(
+              new LatLng(point.lat, point.lon),
+              attractors
+            ).title}</Tooltip
           >
         </CircleMarker>
       {/each}
