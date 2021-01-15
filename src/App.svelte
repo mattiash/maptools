@@ -8,8 +8,10 @@
     TileLayer,
     Tooltip,
   } from "svelte-leafletjs";
+  import { LatLng } from "leaflet";
 
-  let input = "59.33258, 18.0649, Stockholm\n51.50853, -0.12574, London";
+  let attractorS = "59.33258, 18.0649, Stockholm\n51.50853, -0.12574, London";
+  let pointS = "52.520008, 13.404954, Berlin\n48.864716, 2.349014, Paris";
 
   type Point = {
     lat: number;
@@ -17,10 +19,10 @@
     title: string;
     selected?: boolean;
   };
-  let points = new Array<Point>();
+  let attractors = new Array<Point>();
 
-  $: points = processInput(input);
-  $: console.log(points);
+  $: attractors = processInput(attractorS);
+  $: console.log(attractors);
 
   function processInput(data: string) {
     const result = new Array<Point>();
@@ -57,19 +59,40 @@
   let leafletMap;
 
   function mousemove(ev) {
-    // for (const p of TestData.points) {
-    //   p[3] = p[0] < ev.detail.latlng.lat;
-    // }
-    // TestData.points = TestData.points;
+    let closest: Point = undefined;
+    let distance = Infinity;
+
+    for (const p of attractors) {
+      const pl = new LatLng(p.lat, p.lon);
+      const dist = ev.detail.latlng.distanceTo(pl);
+      if (dist < distance) {
+        distance = dist;
+        if (closest) {
+          closest.selected = false;
+        }
+        p.selected = true;
+        closest = p;
+      } else {
+        p.selected = false;
+      }
+    }
+    attractors = attractors;
   }
 </script>
 
 <div style="display: flex; flex-direction: row;">
   <div>
+    <h2>Attractors</h2>
     <textarea
-      style="height: 95vh; display: inline-block"
+      style="height: 40vh; display: inline-block"
       cols="50"
-      bind:value={input}
+      bind:value={attractorS}
+    />
+    <h2>Points</h2>
+    <textarea
+      style="height: 40vh; display: inline-block"
+      cols="50"
+      bind:value={pointS}
     />
   </div>
   <div style="height: 95vh; width:100%">
@@ -80,7 +103,7 @@
       on:mousemove={mousemove}
     >
       <TileLayer url={tileUrl} options={tileLayerOptions} />
-      {#each points as point}
+      {#each attractors as point}
         <CircleMarker
           latLng={[point.lat, point.lon]}
           color={point.selected ? "#ff0000" : "#0000ff"}
@@ -93,11 +116,4 @@
 </div>
 
 <style>
-  /* NOTE: Typically not imported from here, see documentation for more information. */
-  @import "https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css";
-
-  .example {
-    width: 100%;
-    height: 100%;
-  }
 </style>
