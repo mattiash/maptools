@@ -9,8 +9,13 @@
   } from "svelte-leafletjs";
   import { LatLng } from "leaflet";
 
-  let attractorS = "59.33258, 18.0649, Stockholm\n51.50853, -0.12574, London";
-  let pointS = "52.520008, 13.404954, Berlin\n48.864716, 2.349014, Paris";
+  const orgData = decodeURIComponent(window.location.hash.substr(1)).split(
+    "**"
+  );
+  let attractorS =
+    orgData[0] || "59.33258, 18.0649, Stockholm\n51.50853, -0.12574, London";
+  let pointS =
+    orgData[1] || "52.520008, 13.404954, Berlin\n48.864716, 2.349014, Paris";
 
   type Point = {
     lat: number;
@@ -23,6 +28,8 @@
 
   let points = new Array<Point>();
   $: points = processInput(pointS);
+
+  $: window.location.hash = encodeURIComponent(attractorS + "**" + pointS);
 
   function processInput(data: string) {
     const result = new Array<Point>();
