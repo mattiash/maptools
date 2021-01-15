@@ -82,22 +82,14 @@
   }
 </script>
 
-<div style="display: flex; flex-direction: row;">
+<div class="outer">
   <div>
     <h2>Attractors</h2>
-    <textarea
-      style="height: 30vh; display: inline-block"
-      cols="50"
-      bind:value={attractorS}
-    />
+    <textarea cols="50" bind:value={attractorS} />
     <h2>Points</h2>
-    <textarea
-      style="height: 30vh; display: inline-block"
-      cols="50"
-      bind:value={pointS}
-    />
+    <textarea cols="50" bind:value={pointS} />
   </div>
-  <div style="height: 95vh; width:100%">
+  <div class="map">
     <LeafletMap
       bind:this={leafletMap}
       options={mapOptions}
@@ -137,4 +129,19 @@
 </div>
 
 <style>
+  .outer {
+    display: flex;
+    flex-direction: row;
+  }
+
+  textarea {
+    height: 30vh;
+    display: inline-block;
+    margin-right: 0.5em;
+  }
+
+  .map {
+    height: 95vh;
+    width: 100%;
+  }
 </style>
