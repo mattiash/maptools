@@ -1,4 +1,6 @@
 <script lang="ts">
+  import "leaflet/dist/leaflet.css";
+
   import {
     CircleMarker,
     LeafletMap,
