@@ -130,6 +130,14 @@
       <div>Lat: {currLat}</div>
       <div>Lon: {currLon}</div>
     {/if}
+    <div class="infobox">
+      <div>
+        <a href="https://github.com/mattiash/maptools"
+          >Documentation and source</a
+        >
+      </div>
+      <div>&copy; Copyright 2021 Mattias Holmlund.</div>
+    </div>
   </div>
   <div class="map">
     <LeafletMap
@@ -186,7 +194,14 @@
   }
 
   .map {
-    height: 95vh;
+    height: 98vh;
     width: 100%;
+  }
+
+  .infobox {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin: 10px;
   }
 </style>
