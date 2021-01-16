@@ -31,6 +31,9 @@
 
   $: window.location.hash = encodeURIComponent(attractorS + "**" + pointS);
 
+  let currLat = 0;
+  let currLon = 0;
+
   function processInput(data: string) {
     const result = new Array<Point>();
 
@@ -43,12 +46,10 @@
         const lat = parseFloat(latS);
         const lon = parseFloat(lonS);
         if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
-          console.log("push");
           result.push({ lat, lon, title });
         }
       } catch (err) {}
     }
-    console.log(result);
     return result;
   }
   const mapOptions = {
@@ -81,11 +82,41 @@
   }
 
   function mousemove(ev) {
+    currLat = ev.detail.latlng.lat.toFixed(3);
+    currLon = ev.detail.latlng.lng.toFixed(3);
+
     const closest = closestPoint(ev.detail.latlng, attractors);
     for (let attractor of attractors) {
       attractor.selected = attractor === closest;
     }
     attractors = attractors;
+  }
+
+  let clickCount = 0;
+  let prevLat = 0;
+  let prevLon = 0;
+
+  function click(ev) {
+    const lat = ev.detail.latlng.lat;
+    const lon = ev.detail.latlng.lng;
+
+    // The click handler is fired twice. Why?
+    if (lat !== prevLat && lon !== prevLon) {
+      prevLat = lat;
+      prevLon = lon;
+      clickCount++;
+      const title = `click${clickCount}`;
+      pointS += `\n${lat}, ${lon}, ${title}`;
+    }
+  }
+
+  let isOver = false;
+  function mouseover() {
+    isOver = true;
+  }
+
+  function mouseout() {
+    isOver = false;
   }
 </script>
 
@@ -95,13 +126,20 @@
     <textarea cols="50" bind:value={attractorS} />
     <h2>Points</h2>
     <textarea cols="50" bind:value={pointS} />
+    {#if isOver}
+      <div>Lat: {currLat}</div>
+      <div>Lon: {currLon}</div>
+    {/if}
   </div>
   <div class="map">
     <LeafletMap
       bind:this={leafletMap}
       options={mapOptions}
-      events={["mousemove"]}
+      events={["mousemove", "click", "mouseover", "mouseout"]}
       on:mousemove={mousemove}
+      on:mouseover={mouseover}
+      on:mouseout={mouseout}
+      on:click={click}
     >
       <TileLayer url={tileUrl} options={tileLayerOptions} />
       {#each attractors as point}
