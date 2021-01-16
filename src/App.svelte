@@ -121,15 +121,23 @@
 </script>
 
 <div class="outer">
-  <div>
-    <h2>Attractors</h2>
-    <textarea cols="50" bind:value={attractorS} />
-    <h2>Points</h2>
-    <textarea cols="50" bind:value={pointS} />
-    {#if isOver}
+  <div class="inner">
+    <div>
+      <h2>Attractors</h2>
+    </div>
+    <div class="grow">
+      <textarea cols="50" bind:value={attractorS} />
+    </div>
+    <div>
+      <h2>Points</h2>
+    </div>
+    <div class="grow">
+      <textarea cols="50" bind:value={pointS} />
+    </div>
+    <div class="currpos" class:visible={isOver}>
       <div>Lat: {currLat}</div>
       <div>Lon: {currLon}</div>
-    {/if}
+    </div>
     <div class="infobox">
       <div>
         <a href="https://github.com/mattiash/maptools"
@@ -187,8 +195,26 @@
     flex-direction: row;
   }
 
+  .inner {
+    display: flex;
+    flex-direction: column;
+  }
+  .grow {
+    flex-grow: 1;
+  }
+
+  .currpos {
+    opacity: 0;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  .visible {
+    opacity: 1;
+  }
+
   textarea {
-    height: 30vh;
+    height: 100%;
     display: inline-block;
     margin-right: 0.5em;
   }
@@ -199,9 +225,5 @@
   }
 
   .infobox {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    margin: 10px;
   }
 </style>
